@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+
+# C extensions
+*.so
+
+# Environments
+.env
+env/
+*env/
+env
+
+
+# pyenv
+.python-version
+
+
+# VS Code
+.code-workspace
+
+# Hidden JSON files
+.*.json
+.vscode/
