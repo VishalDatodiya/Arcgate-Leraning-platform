@@ -56,18 +56,25 @@ class ProjectsSerializer(serializers.ModelSerializer):
 
 class PermissionsSerializer(serializers.ModelSerializer):
     permission = UserDatasSerializer()
-    username = serializers.CharField(source="users.username")
-    user_id = serializers.CharField(source="users.id")
+    username = serializers.CharField(source="users.username", read_only=True)
+    user_id = serializers.CharField(source="users.id", read_only=True)
     project = serializers.CharField(source="project.project_name")
     role = serializers.StringRelatedField(read_only=True)
+    fullname = serializers.SerializerMethodField(method_name='get_fullname', read_only=True)
 
+    
     class Meta:
         model = UserData
         fields = [
             "user_id",
             "username",
+            'fullname',
             "project",
             "role",
             "status",
-            "permission",
+            "permission"
         ]
+        
+    def get_fullname(self, obj):
+        return f"{obj.users.first_name} {obj.users.last_name}"  
+    

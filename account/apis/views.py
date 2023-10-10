@@ -39,8 +39,8 @@ class BasicPagination(PageNumberPagination):
 
 class UserListing(APIView, PaginationHandlerMixin):
     def get(self, request, *args, **kwargs):
-        users_data = User.objects.get(pk=1)
-        print(users_data.last_name)
+        # users_data = User.objects.get(pk=1)
+        # print(users_data.last_name)
         search_query = self.request.query_params.get("search")
 
         ordering = self.request.query_params.get("ordering", "id")
@@ -160,7 +160,7 @@ class UserDetail(APIView):
     def get(self, request, user_id):
         try:
             user_data = UserData.objects.filter(users_id=user_id)
-
+            
             if user_data.exists():
                 serializer = PermissionsSerializer(user_data, many=True)
 

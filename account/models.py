@@ -56,9 +56,6 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
-    def __str__(self):
-        return self.email
-
 class Permission(AbstractTable):
     read = models.BooleanField(default=False)
     delete = models.BooleanField(default=False)
