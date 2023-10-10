@@ -24,3 +24,20 @@ def error_response():
             "code": 200,
             "result": []
         }     
+    
+def invalid_data_formate_response():
+    return {
+            "message": messages.invalid_data_formate,
+            "error": True,
+            "code": 200,
+            "result": []
+        }
+    
+def user_data_not_found_response():
+    return {
+            "message": messages.user_data_not_found,
+            "error": True,
+            "code": 200,
+            "result": []
+        }
+    
