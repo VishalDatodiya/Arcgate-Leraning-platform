@@ -6,7 +6,7 @@ from account.models import User
 
 
 class CustomPagination(pagination.PageNumberPagination):
-    page_size = 50
+    page_size = 2
     page_size_query_param = "page_size"
     max_page_size = 100
     page_query_param = "p"
@@ -95,3 +95,5 @@ class PaginationHandlerMixin(object):
             },
             status=status.HTTP_200_OK,
         )
+        
+        

@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from account.apis.serializers import LoginSerializer, PermissionsSerializer
 from drf_yasg.utils import swagger_auto_schema
@@ -11,6 +13,7 @@ from account.models import UserData, User
 from account.apis import responses
 from account.apis.pagination import PaginationHandlerMixin
 from django.db import transaction
+
 
 
 def get_tokens_for_user(user):
@@ -33,14 +36,106 @@ class Login(APIView):
         return Response({"token": token}, status=status.HTTP_200_OK)
 
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class TokenRefreshView(APIView):    
+    def post(self, request):
+        refresh_token = request.data.get('refresh')
+        print(refresh_token)
+        if refresh_token:
+            try:
+                # Attempt to verify the refresh token
+                refresh_token_obj = RefreshToken(refresh_token)
+                access_token = str(refresh_token_obj.access_token)
+
+                # Return the new access token
+                return Response({'access': access_token}, status=status.HTTP_200_OK)
+            except Exception as e:
+                # Handle invalid or expired refresh token
+                return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+# class Logout(APIView):
+#     # permission_classes = [IsAuthenticated]
+#     # authentication_classes = [JSONWebTokenAuthentication]
+#     def post(self, request):
+#         # print(request.headers.get('Authorization'))
+#         auth_token = request.META.get('HTTP_AUTHORIZATION')
+#         auth_token.delete()
+#         return Response(status=status.HTTP_200_OK)
+
+
+# from rest_framework_jwt.views import JSONWebTokenAPIView
+# from rest_framework_jwt.blacklist.models import BlacklistedToken
+
+# class LogoutAPIView(JSONWebTokenAPIView):
+#     def post(self, request, *args, **kwargs):
+#         # Get the token from the request
+#         token = request.data.get('token')
+
+#         # Add the token to the blacklist
+#         BlacklistedToken.objects.create(token=token)
+
+#         # Return a success response
+#         return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            print(refresh_token)
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
+
+class LogoutAllView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+        return Response(status=status.HTTP_205_RESET_CONTENT)
+
+
+
 class BasicPagination(PageNumberPagination):
     page_size_query_param = "limit"
 
 
 class UserListing(APIView, PaginationHandlerMixin):
+    
+    permission_classes = [IsAuthenticated]
+    
+
+    
     def get(self, request, *args, **kwargs):
         # users_data = User.objects.get(pk=1)
         # print(users_data.last_name)
+        # print(request.headers.get('Authorization'))
+        # auth_token = request.META.get('HTTP_AUTHORIZATION')
+        # print(auth_token)
+        
         search_query = self.request.query_params.get("search")
 
         ordering = self.request.query_params.get("ordering", "id")
